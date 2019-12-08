@@ -15,12 +15,18 @@ cache:
 
 before_script:
   - mkdir -p build/logs
+  - wget https://github.com/infection/infection/releases/download/0.15.0/infection.phar
+  - wget https://github.com/infection/infection/releases/download/0.15.0/infection.phar.asc
+  - gpg --keyserver hkps.pool.sks-keyservers.net --recv-keys 493B4AA0
+  - gpg --with-fingerprint --verify infection.phar.asc infection.phar
+  - chmod +x infection.phar
 
 install:
   - travis_retry composer install --no-interaction --no-suggest
 
 script:
   - ./vendor/bin/phpunit --configuration ./phpunit.xml --coverage-clover=coverage.clover
+  - ./infection.phar --min-msi=100 --threads=4
   - if [ $TRAVIS_PHP_VERSION = "7.4" ]; then ./vendor/bin/psalm --config=psalm.xml; fi
   - if [ $TRAVIS_PHP_VERSION = "7.4" ]; then ./vendor/bin/phpstan analyse src --level 7; fi
   - if [ $TRAVIS_PHP_VERSION = "7.4" ]; then ./vendor/bin/php-cs-fixer fix --allow-risky=yes --dry-run; fi
@@ -28,4 +34,3 @@ script:
 after_script:
   - if [ $TRAVIS_PHP_VERSION = "7.4" ]; then wget https://scrutinizer-ci.com/ocular.phar; fi
   - if [ $TRAVIS_PHP_VERSION = "7.4" ]; then php ocular.phar code-coverage:upload --format=php-clover coverage.clover; fi
-
