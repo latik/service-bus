@@ -3,11 +3,6 @@ language: php
 php:
   - 7.4
 
-addons:
-  apt:
-    packages:
-      - rabbitmq-server
-
 cache:
   directories:
     - $HOME/.cache/composer
